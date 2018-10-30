@@ -1,0 +1,256 @@
+Generamos la aplicación con express-generator
+
+npm install -g express-generator
+
+express api
+
+
+
+CREAR TABLA
+
+Tenemos que comunicar con la base de datos.
+
+https://www.w3schools.com/nodejs/nodejs_mysql.asp
+
+
+npm install mysql
+
+Conectamos con la base de datos de la siguiente manera.
+
+Implementamos el fichero config/database.js
+
+Añadimos en app.js
+
+var db = require("./config/database");
+
+db.connect();
+
+
+Nos queda una aproximación no demasiado funcional de la siguiente manera:
+
+app.js
+
+..............
+
+var db = require("./config/database");
+
+db.connect();
+
+var app = express();
+
+...............
+...............
+
+app.post('/',function(req,res){
+
+	//res.json(req.body.name)
+
+  db.insert(req.body.description);
+
+  //console.log(req.body.description)
+
+  res.send("La fila ha sido insertada")
+
+})
+
+database.js
+
+var mysql = require("mysql");
+
+var con = mysql.createConnection({
+  
+  host: "127.0.0.1",
+  
+  user: "root",
+  
+  password: "root", 
+
+  database: "prueba"
+
+});
+
+
+
+ module.exports = {
+
+	connect : ()=>{
+
+		con.connect(function(err) {
+		  
+		  if (err) throw err;
+		  console.log("Connected!");
+
+		  con.query("CREATE DATABASE IF NOT EXISTS prueba", function (err, result) {
+		    
+		    if (err) throw err;
+		    
+		    console.log("Database prueba ready");
+		  	
+		  	var sql = "CREATE TABLE IF NOT EXISTS tasks (id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, description VARCHAR(255))";
+
+		  	con.query(sql, function (err, result) {
+	    		
+	    		if (err) throw err;
+	    		
+	    		console.log("Table ready");
+	  		});
+
+		  });
+		
+
+		});
+
+		
+	},
+
+	insert : (data)=>{
+
+		
+		//console.log(data)
+
+		var sql = `INSERT INTO tasks (description) VALUES ("${data}")`
+
+		//console.log(sql)
+		
+		con.query(sql, function (err, result) {
+    		
+    		if (err) throw err;
+    		
+    		console.log("Fila insertada");
+  		  
+  		});
+
+		
+	}
+
+}
+
+
+
+
+
+
+
+SANITIZE
+
+Ataque de inyección SQL se presentan cuando no limpiamos los parámetros que se pasan a una consulta
+
+La mayoría de los drivers tienen la funcionalidad de realizar el proceso de "sanitize"
+
+
+Es bastante interesante siempre investigar la documentación del driver para ver como se realiza.
+
+
+
+
+
+Sequelize.js
+
+ORM(Object Relational Mapping). vamos a utlizar un ORM para nuestras operaciones con la base de datos:
+
+
+
+npm install sequelize --save
+
+npm install --save mysql2
+
+const Sequelize = require('sequelize')
+
+const sequelize = new Sequelize('prueba','root','root',{
+
+	host : '127.0.0.1',
+	
+	dialect: 'mysql'
+
+});
+
+
+
+
+
+MIGRACIONES
+
+Archivos de código que definen los cambios que se realizarán sobre el esquema de la base de datos (crear tablas, eliminar tablas, editar tipos de campos en tablas.......)
+
+
+npm install -g sequelize-cli
+
+A traves de esta herramienta gestionamos los proyectos de sequelize
+
+
+sequelize --version
+
+sequelize init
+
+Se nos generán 4 carpetas: models, migrations, seeders y config
+
+Dentro de la carpeta config se nos genera un archivo config.json
+
+Configuramos la parte de desarrollo:
+
+
+{
+  "development": {
+    "username": "root",
+    "password": "root",
+    "database": "prueba",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
+
+
+
+
+
+
+GENERANDO MIGRACIONES
+
+
+Sequelize posee un generador que crea el modelo y la migración correspondiente.
+
+
+sequelize model:generate --name Task --attributes description:text
+
+Se nos generarán dos ficheros. En las carpetas models y migrations
+
+
+El comando para ejecutar las migraciones:
+
+sequelize db:migrate
+
+
+Si queremos revertir la última migración lo podemos realizar de la siguiente manera:
+
+sequelize db:migrate:undo
+
+
+
+Archivo models/index.js
+
+Lee todos los modelos dentro de la carpeta models.
+
+Hace innecesarias las líneas de conexión a la BBDD dentro de app.js
+
+
+
+
+CONTROLADORES
+
+
+
+
