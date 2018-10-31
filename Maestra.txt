@@ -450,7 +450,18 @@ block content
   p= task.createdAt
 
 
+La búsqueda del registro también se puede realizar mediante la siguiente función:
 
+Task.findById(req.prams.id)
+	
+	.then((task)=>{
+
+		res.render('showTask',{task:task})
+	
+	}).catch((err)=>{
+
+		console.log(err)
+	})
 
 
 
