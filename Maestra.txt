@@ -249,7 +249,210 @@ Hace innecesarias las líneas de conexión a la BBDD dentro de app.js
 
 
 
+
 CONTROLADORES
+
+
+Creamos el archivo TasksController.js
+
+Para manejar el modelo incorporamos la siguiente línea:
+
+const Task = require('../models').Task;
+
+
+
+
+
+SEEDERS
+
+Forma elegante de insertar datos en una base de datos en desarrollo es mediante un seeder
+
+sequelize seed:generate --name generate_tasks 
+
+Se nos genera un archivo en la carpeta de los seeders.
+
+Editamos el archivo con la información:
+
+
+Una vez implementada la información. 
+
+sequelize db:seed:all
+
+
+Comando
+
+sequelize:seed:undo deshace cambios en último seeder que se haya ejecutado.
+
+sequelize:seed:undo:all para deshacer las modificaciones de todos los seeders
+
+
+
+
+
+
+
+CONTROLADORES y VISTAS(Primera aproximación)
+
+
+TasksController.js
+
+const Task = require('../models').Task;
+
+function index(req,res){
+
+	//Muestra las tareas
+
+	Task.findAll().then(function(tasks){
+
+		res.render('index',{tasks:tasks})
+
+		console.log(tasks)
+	})
+
+
+
+}
+
+module.exports = {
+	
+	index:index,
+	
+}
+
+
+
+app.js
+
+const tasks = require('./controllers/tasksController')
+
+app.get('/tasks',tasks.index)
+
+
+
+index.pug
+
+extends layout
+
+block content
+  
+  h1 LISTA DE TAREAS
+
+  ul
+
+    each task in tasks
+
+      li= task.description
+
+
+
+
+
+RUTAS REST EN EXPRESS
+
+Nos basamos en proyecto Node.js/git/Node.js-Web-Service para la realización del REST
+
+
+
+CREAR NUEVOS REGISTROS
+
+
+Posiblemente tengamos que crear una página con un formulario.
+
+Lo probaremos primero con POSTMAN supongo:
+
+router.route('/')
+
+	.get(tasksController.index)
+
+	.post(tasksController.create)
+
+
+En el controlador:
+
+function create(req,res){
+
+	Task.create({description:req.body.description}).then((result)=>{
+
+		res.json(result)
+
+
+	}).catch((err)=>{
+		
+		console.log(err)
+		res.json(err)
+
+	})
+}
+
+
+
+Una página de formulario muy fácil nos queda de la siguiente manera:
+
+extends layout
+
+block content
+  
+  h1 PÁGINA FORMULARIO TASKS
+
+  form(action="/tasks" method="POST")
+
+    textarea(name="description" placeholder="Coloca la tarea a realizar")
+
+    input(type="submit" value="Guardar")
+
+
+
+
+
+
+CONSULTA INDIVIDUAL DE RECURSOS
+
+Interesante es que cuando se construye el link ya no está soportada la interpolación de la  antigua manera.
+
+Se hace de la siguiente manera:
+
+a(href='/tasks/' + task.id) Ir al contenido
+
+
+
+router.route('/:id')
+
+	.get(tasksController.show)
+
+
+function show(req,res){
+
+	Task.findOne({
+  		where: {id: req.params.id},
+  		attributes: ['id','description','createdAt']
+	
+	}).then((task)=>{
+
+		res.render('showTask',{task:task})
+	
+	}).catch((err)=>{
+
+		console.log(err)
+	})
+}
+
+
+Creación de la vista
+
+extends layout
+
+block content
+  
+  h1 TAREA ESPECÍFICA
+
+  h2= task.description
+
+  p= task.createdAt
+
+
+
+
+
 
 
 

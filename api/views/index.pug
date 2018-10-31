@@ -2,4 +2,14 @@ extends layout
 
 block content
   
-  h1 Hola Mundo
+  h1 LISTA DE TAREAS
+
+  ul
+
+    each task in tasks
+
+      li= task.description
+
+      a(href='/tasks/' + task.id) Ir al contenido
+
+

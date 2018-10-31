@@ -18,7 +18,7 @@ const sequelize = new Sequelize('prueba','root','root',{
 
 });*/
 
-
+const tasks = require('./routes/tasks')
 
 var app = express();
 
@@ -33,12 +33,10 @@ app.set("view engine", "pug")
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/tasks', tasks);
 
-app.get('/',function(req,res){
 
-	res.render('index')
-
-})
+//app.get('/tasks',tasks.index)
 
 /*app.post('/',function(req,res){
 

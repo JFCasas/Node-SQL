@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  
+  h1 PÁGINA FORMULARIO TASKS
+
+  form(action="/tasks" method="POST")
+
+    textarea(name="description" placeholder="Coloca la tarea a realizar")
+
+    input(type="submit" value="Guardar")
